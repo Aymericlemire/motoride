@@ -2,6 +2,7 @@ import { getFirebaseServices } from "../../firebase-config.js";
 import { ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
 const socialState = { loading: false, shareEnabled: false, timerId: null, watchId: null, currentGroupId: null };
+const nearbyState = { radiusKm: 10 };
 
 export function isLiveLocationShareEnabled() {
   return socialState.shareEnabled;
@@ -26,7 +27,15 @@ export function initSocialUI() {
     </div>
     <div id="socialStatus" class="social-item">Statut: prêt.</div>
     <div class="card">
-      <h3>Riders à côté de moi</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+        <h3 style="margin:0;">Riders à côté de moi</h3>
+        <select id="nearbyRadiusSelect" class="auth-input" style="max-width:120px;">
+          <option value="5">5 km</option>
+          <option value="10" selected>10 km</option>
+          <option value="20">20 km</option>
+          <option value="50">50 km</option>
+        </select>
+      </div>
       <div id="nearbyRidersList" class="social-list">
         <div class="social-item">Aucun rider détecté pour le moment.</div>
       </div>
@@ -130,8 +139,10 @@ export function renderNearbyRiders(presence = {}, currentUid, selfCoords, maxDis
     return;
   }
 
+  const now = Date.now();
   const nearby = Object.entries(presence)
     .filter(([uid, p]) => uid !== currentUid && Number.isFinite(p?.lat) && Number.isFinite(p?.lng))
+    .filter(([, p]) => Number.isFinite(p?.updatedAt) && now - p.updatedAt < 120000)
     .map(([uid, p]) => ({
       uid,
       status: p.status || "inconnu",
@@ -156,6 +167,20 @@ export function renderNearbyRiders(presence = {}, currentUid, selfCoords, maxDis
     `
     )
     .join("");
+}
+
+export function bindNearbyRadiusChange(onChange) {
+  const select = document.getElementById("nearbyRadiusSelect");
+  if (!select) return;
+  select.value = String(nearbyState.radiusKm);
+  select.addEventListener("change", () => {
+    nearbyState.radiusKm = Number(select.value) || 10;
+    if (typeof onChange === "function") onChange(nearbyState.radiusKm);
+  });
+}
+
+export function getNearbyRadiusKm() {
+  return nearbyState.radiusKm;
 }
 
 export function stopLiveLocationShare() {

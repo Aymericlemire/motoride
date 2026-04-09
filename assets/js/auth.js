@@ -8,12 +8,14 @@ import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   deleteUser,
+  getRedirectResult,
   onAuthStateChanged,
   reauthenticateWithCredential,
   EmailAuthProvider,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
@@ -50,6 +52,8 @@ function getFriendlyAuthError(errorCode) {
     "auth/email-already-in-use": "Cet email est déjà utilisé.",
     "auth/weak-password": "Le mot de passe est trop faible (6 caractères minimum).",
     "auth/popup-closed-by-user": "La fenêtre de connexion Google a été fermée.",
+    "auth/popup-blocked": "Popup bloquée par le navigateur. Utilise la redirection.",
+    "auth/unauthorized-domain": "Domaine non autorisé dans Firebase Auth. Ajoute ton domaine web.app dans Authorized domains.",
     "auth/network-request-failed": "Problème réseau, vérifie ta connexion.",
     "auth/requires-recent-login": "Reconnecte-toi pour effectuer cette action sensible."
   };
@@ -106,6 +110,14 @@ export async function initAuth() {
     await initializeFirebase();
     const { auth } = getFirebaseServices();
 
+    // Récupère le résultat Google en mode redirect (fallback mobile).
+    const redirectResult = await getRedirectResult(auth).catch(() => null);
+    if (redirectResult?.user) {
+      const redirectProfile = await ensureProfile(redirectResult.user);
+      setUserState(redirectResult.user, redirectProfile);
+      dispatchAuthEvent(AUTH_EVENTS.SUCCESS, { message: "Connexion Google réussie (redirect)." });
+    }
+
     onAuthStateChanged(auth, async (user) => {
       try {
         if (!user) {
@@ -140,12 +152,20 @@ export async function signInWithGoogle() {
     const { auth } = getFirebaseServices();
     const provider = new GoogleAuthProvider();
 
-    const result = await signInWithPopup(auth, provider);
-    const profile = await ensureProfile(result.user);
-    setUserState(result.user, profile);
-
-    dispatchAuthEvent(AUTH_EVENTS.SUCCESS, { message: "Connexion Google réussie." });
-    return result.user;
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const profile = await ensureProfile(result.user);
+      setUserState(result.user, profile);
+      dispatchAuthEvent(AUTH_EVENTS.SUCCESS, { message: "Connexion Google réussie." });
+      return result.user;
+    } catch (popupError) {
+      // Fallback mobile / popup bloquée: redirection OAuth.
+      if (popupError?.code === "auth/popup-blocked" || popupError?.code === "auth/cancelled-popup-request") {
+        await signInWithRedirect(auth, provider);
+        return null;
+      }
+      throw popupError;
+    }
   } catch (error) {
     const message = getFriendlyAuthError(error.code);
     dispatchAuthEvent(AUTH_EVENTS.ERROR, { message, raw: error });

@@ -1,11 +1,12 @@
 import { initAuth, signInWithGoogle, getAuthState, logout } from "./auth.js";
+import { isFirebaseConfigured } from "../../firebase-config.js";
 import { initNavigation } from "./navigation.js";
 import { loadTracks, getTracks } from "./load-data.js";
-import { initMap, renderTracksOnMap, getMap, renderLiveRiders, renderRiderTraces, focusOnGroup, renderSelfPilotPosition } from "./map.js";
+import { initMap, renderTracksOnMap, getMap, renderLiveRiders, renderRiderTraces, focusOnGroup, renderSelfPilotPosition, getSelfPilotCoords } from "./map.js";
 import { initRouting } from "./routing.js";
 import { initCircuitsUI } from "./circuits.js";
 import { loadWeather, renderWeatherWidget } from "./weather.js";
-import { initSocialUI, startLiveLocationShare, stopLiveLocationShare, watchGroupPresence, watchGroupTraces, getOrCreateLocalRiderId, isLiveLocationShareEnabled } from "./social.js";
+import { initSocialUI, startLiveLocationShare, stopLiveLocationShare, watchGroupPresence, watchGroupTraces, getOrCreateLocalRiderId, isLiveLocationShareEnabled, renderNearbyRiders } from "./social.js";
 import { sendChatMessage, watchLastMessages } from "./chat.js";
 import { startTracking, stopTrackingAndSave } from "./tracking.js";
 import { renderStatsDashboard } from "./stats.js";
@@ -220,10 +221,17 @@ function initPwaInstall() {
 async function bootstrap() {
   setGlobalLoading(true);
   try {
+    const firebaseReady = isFirebaseConfigured();
+    if (!firebaseReady) {
+      showToast("Firebase non configure: renseigne tes cles dans firebase-config.js", "error");
+    }
+
     initTheme();
     initNavigation();
-    await initAuth();
-    await requestGpsPermission();
+    if (firebaseReady) {
+      await initAuth();
+    }
+    const gpsGranted = await requestGpsPermission();
     initMap();
     initRouting(getMap());
     const tracks = await loadTracks();
@@ -243,6 +251,18 @@ async function bootstrap() {
     });
     startLocalPilotWatcher();
 
+    // Intégration Firebase: active automatiquement la présence live si GPS OK.
+    if (firebaseReady && gpsGranted && !isLiveLocationShareEnabled()) {
+      const uid = getRuntimeRiderId();
+      startLiveLocationShare(
+        uid,
+        "global",
+        () => showToast("Impossible d'envoyer la position Firebase", "error"),
+        (position) => renderSelfPilotPosition(position, "Moi (GPS local)")
+      );
+      showToast("Présence Firebase activée", "success");
+    }
+
     document.getElementById("locatePilotBtn")?.addEventListener("click", () => {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -256,6 +276,10 @@ async function bootstrap() {
     });
 
     document.getElementById("shareToggleBtn")?.addEventListener("click", () => {
+      if (!firebaseReady) {
+        showToast("Firebase non configure: partage riders indisponible", "error");
+        return;
+      }
       const uid = getRuntimeRiderId();
       if (!isLiveLocationShareEnabled()) {
         startLiveLocationShare(
@@ -274,6 +298,7 @@ async function bootstrap() {
     watchGroupPresence("global", (presence) => {
       const currentUid = getRuntimeRiderId();
       renderLiveRiders(presence, currentUid);
+      renderNearbyRiders(presence, currentUid, getSelfPilotCoords(), 10);
       if (!hasFocusedGroupOnce && Object.keys(presence || {}).length > 0) {
         focusOnGroup(presence);
         hasFocusedGroupOnce = true;

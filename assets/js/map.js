@@ -6,7 +6,8 @@ const mapState = {
   map: null,
   riderMarkers: new Map(),
   riderPolylines: new Map(),
-  selfMarker: null
+  selfMarker: null,
+  selfCoords: null
 };
 
 export function getMap() {
@@ -161,6 +162,7 @@ export function renderSelfPilotPosition(position, label = "Moi (local)") {
     const lat = position.coords.latitude;
     const lng = position.coords.longitude;
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    mapState.selfCoords = { lat, lng };
 
     const icon = L.divIcon({
       className: "rider-self-marker",
@@ -182,4 +184,8 @@ export function renderSelfPilotPosition(position, label = "Moi (local)") {
   } catch (error) {
     console.error("[Map] Erreur renderSelfPilotPosition:", error);
   }
+}
+
+export function getSelfPilotCoords() {
+  return mapState.selfCoords ? { ...mapState.selfCoords } : null;
 }

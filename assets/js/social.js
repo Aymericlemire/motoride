@@ -25,6 +25,12 @@ export function initSocialUI() {
       <button id="createGroupBtn" class="btn-secondary">Créer un groupe</button>
     </div>
     <div id="socialStatus" class="social-item">Statut: prêt.</div>
+    <div class="card">
+      <h3>Riders à côté de moi</h3>
+      <div id="nearbyRidersList" class="social-list">
+        <div class="social-item">Aucun rider détecté pour le moment.</div>
+      </div>
+    </div>
     <div class="chat-box card">
       <h3>Chat riders</h3>
       <div id="chatMessages" class="chat-messages"></div>
@@ -40,6 +46,7 @@ function setSocialStatus(message) {
 }
 
 export function startLiveLocationShare(uid, groupId = "global", onError = null, onLocalPosition = null) {
+  if (socialState.shareEnabled) return;
   socialState.loading = true;
   socialState.shareEnabled = true;
   socialState.currentGroupId = groupId;
@@ -99,6 +106,56 @@ export function startLiveLocationShare(uid, groupId = "global", onError = null, 
   } finally {
     socialState.loading = false;
   }
+}
+
+function toRad(value) {
+  return (value * Math.PI) / 180;
+}
+
+function distanceKm(a, b) {
+  const R = 6371;
+  const dLat = toRad(b.lat - a.lat);
+  const dLon = toRad(b.lng - a.lng);
+  const c =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return 2 * R * Math.atan2(Math.sqrt(c), Math.sqrt(1 - c));
+}
+
+export function renderNearbyRiders(presence = {}, currentUid, selfCoords, maxDistanceKm = 10) {
+  const host = document.getElementById("nearbyRidersList");
+  if (!host) return;
+  if (!selfCoords?.lat || !selfCoords?.lng) {
+    host.innerHTML = `<div class="social-item">Position locale indisponible.</div>`;
+    return;
+  }
+
+  const nearby = Object.entries(presence)
+    .filter(([uid, p]) => uid !== currentUid && Number.isFinite(p?.lat) && Number.isFinite(p?.lng))
+    .map(([uid, p]) => ({
+      uid,
+      status: p.status || "inconnu",
+      distance: distanceKm(selfCoords, { lat: p.lat, lng: p.lng })
+    }))
+    .filter((r) => r.distance <= maxDistanceKm)
+    .sort((a, b) => a.distance - b.distance);
+
+  if (!nearby.length) {
+    host.innerHTML = `<div class="social-item">Aucun rider dans un rayon de ${maxDistanceKm} km.</div>`;
+    return;
+  }
+
+  host.innerHTML = nearby
+    .map(
+      (r) => `
+      <div class="social-item">
+        <strong>Rider ${r.uid.slice(0, 6)}</strong><br>
+        <span class="${r.status === "en route" ? "status-online" : "status-offline"}">${r.status}</span>
+        · ${r.distance.toFixed(2)} km
+      </div>
+    `
+    )
+    .join("");
 }
 
 export function stopLiveLocationShare() {

@@ -13,17 +13,36 @@ import { getMessaging, isSupported } from "https://www.gstatic.com/firebasejs/10
 
 // Remplacer avec les vraies clés de production.
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyBSFRFTR-pAGu9_M8Ff9i2HWblXli7hFlI",
+  authDomain: "motoride-f54d6.firebaseapp.com",
+  // Realtime Database requise pour la localisation riders.
+  databaseURL: "https://motoride-f54d6-default-rtdb.firebaseio.com",
+  projectId: "motoride-f54d6",
+  storageBucket: "motoride-f54d6.firebasestorage.app",
+  messagingSenderId: "488045896105",
+  appId: "1:488045896105:web:e796ad2ac143e1d53de4b8"
 };
+
+export const FIREBASE_MEASUREMENT_ID = "G-BDMMF4M93G";
 
 export const WEATHER_API_KEY = "YOUR_OPENWEATHER_KEY";
 export const WEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5";
+
+function isPlaceholder(value) {
+  return typeof value !== "string" || value.includes("YOUR_");
+}
+
+export function isFirebaseConfigured() {
+  return !(
+    isPlaceholder(firebaseConfig.apiKey) ||
+    isPlaceholder(firebaseConfig.authDomain) ||
+    isPlaceholder(firebaseConfig.databaseURL) ||
+    isPlaceholder(firebaseConfig.projectId) ||
+    isPlaceholder(firebaseConfig.storageBucket) ||
+    isPlaceholder(firebaseConfig.messagingSenderId) ||
+    isPlaceholder(firebaseConfig.appId)
+  );
+}
 
 let appInstance = null;
 let authInstance = null;
@@ -37,6 +56,12 @@ let messagingInstance = null;
  * @returns {Promise<{ app: import('firebase/app').FirebaseApp, auth: any, db: any, rtdb: any, storage: any, messaging: any }>}
  */
 export async function initializeFirebase() {
+  if (!isFirebaseConfigured()) {
+    throw new Error(
+      "Firebase non configure: remplace les valeurs YOUR_* dans firebase-config.js."
+    );
+  }
+
   if (appInstance && authInstance && dbInstance && rtdbInstance && storageInstance) {
     return {
       app: appInstance,

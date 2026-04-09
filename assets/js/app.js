@@ -15,6 +15,7 @@ import { initTestRideUI } from "./test-ride.js";
 
 const appState = { loading: false, deferredInstallPrompt: null, currentTrips: [] };
 let hasFocusedGroupOnce = false;
+let localPilotWatchId = null;
 
 function getRuntimeRiderId() {
   return getAuthState().user?.uid || getOrCreateLocalRiderId();
@@ -34,6 +35,35 @@ export function showToast(message, type = "info") {
   item.textContent = message;
   container.appendChild(item);
   setTimeout(() => item.remove(), 2600);
+}
+
+function describeGeoError(error) {
+  if (!error || typeof error.code !== "number") return "Erreur GPS inconnue.";
+  if (error.code === 1) return "Permission GPS refusée.";
+  if (error.code === 2) return "Position indisponible.";
+  if (error.code === 3) return "Timeout GPS.";
+  return "Erreur GPS inconnue.";
+}
+
+function startLocalPilotWatcher() {
+  try {
+    if (!("geolocation" in navigator)) {
+      showToast("Geolocalisation non supportee sur cet appareil", "error");
+      return;
+    }
+    if (localPilotWatchId !== null) return;
+    localPilotWatchId = navigator.geolocation.watchPosition(
+      (position) => {
+        renderSelfPilotPosition(position, "Moi (local)");
+      },
+      (error) => {
+        showToast(describeGeoError(error), "error");
+      },
+      { enableHighAccuracy: true, maximumAge: 2000, timeout: 12000 }
+    );
+  } catch (error) {
+    console.error("[App] Erreur startLocalPilotWatcher:", error);
+  }
 }
 
 function initTheme() {
@@ -176,6 +206,22 @@ async function bootstrap() {
     navigator.geolocation.getCurrentPosition(async (pos) => {
       const weather = await loadWeather(pos.coords.latitude, pos.coords.longitude);
       renderWeatherWidget(weather);
+      renderSelfPilotPosition(pos, "Moi (local)");
+    }, (error) => {
+      showToast(describeGeoError(error), "error");
+    });
+    startLocalPilotWatcher();
+
+    document.getElementById("locatePilotBtn")?.addEventListener("click", () => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          renderSelfPilotPosition(pos, "Moi (local)");
+          getMap()?.setView([pos.coords.latitude, pos.coords.longitude], 15);
+          showToast("Position pilote mise a jour", "success");
+        },
+        (error) => showToast(describeGeoError(error), "error"),
+        { enableHighAccuracy: true, timeout: 12000 }
+      );
     });
 
     document.getElementById("shareToggleBtn")?.addEventListener("click", () => {

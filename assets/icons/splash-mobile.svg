@@ -1,0 +1,22 @@
+<svg width="1170" height="2532" viewBox="0 0 1170 2532" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="splashBg" x1="585" y1="0" x2="585" y2="2532" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#090513"/>
+      <stop offset="1" stop-color="#04020a"/>
+    </linearGradient>
+    <radialGradient id="splashGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(585 1266) rotate(90) scale(520 320)">
+      <stop stop-color="#8b5cf6" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="logoGrad" x1="450" y1="1130" x2="720" y2="1402" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c4b5fd"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect width="1170" height="2532" fill="url(#splashBg)"/>
+  <ellipse cx="585" cy="1310" rx="360" ry="280" fill="url(#splashGlow)"/>
+  <rect x="395" y="1064" width="380" height="380" rx="92" fill="#120c24" stroke="#c4b5fd" stroke-opacity="0.28" stroke-width="2"/>
+  <path d="M466 1262C466 1201 512 1155 585 1155C658 1155 704 1201 704 1252V1272H670V1252C670 1222 646 1190 585 1190C524 1190 500 1224 500 1260V1272H466V1262Z" fill="url(#logoGrad)"/>
+  <path d="M486 1284H551C562 1284 571 1293 571 1304V1326C571 1337 562 1346 551 1346H486C475 1346 466 1337 466 1326V1304C466 1293 475 1284 486 1284Z" fill="#f5f3ff"/>
+  <path d="M620 1284H685C696 1284 705 1293 705 1304V1326C705 1337 696 1346 685 1346H620C609 1346 600 1337 600 1326V1304C600 1293 609 1284 620 1284Z" fill="#f5f3ff"/>
+</svg>

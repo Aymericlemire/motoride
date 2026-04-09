@@ -1,0 +1,8 @@
+.social-actions, .chat-box, .group-box { display: grid; gap: 10px; }
+.social-actions { grid-template-columns: 1fr 1fr; margin-bottom: 12px; }
+.social-list { display: grid; gap: 8px; }
+.social-item { padding: 10px; border-radius: var(--radius); background: var(--surface); }
+.status-online { color: var(--success); }
+.status-offline { color: var(--muted); }
+.chat-messages { max-height: 320px; overflow: auto; display: grid; gap: 8px; }
+.chat-message { padding: 8px 10px; border-radius: 10px; background: var(--bg-soft); }

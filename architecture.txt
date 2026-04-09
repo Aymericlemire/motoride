@@ -1,0 +1,42 @@
+MotoTrack (racine Motoride/)
+├── index.html               ← Shell PWA (5 onglets + map + modules)
+├── firebase-config.js       ← Initialisation Firebase + OpenWeather keys
+├── manifest.json            ← Manifest complet installable Android/iOS
+├── sw.js                    ← Cache First static + Network First data/API + push/sync
+├── architecture.txt         ← Ce document d'architecture
+└── assets/
+    ├── css/
+    │   ├── design-system.css ← Variables globales, thèmes, composants de base
+    │   ├── app.css           ← Layout global, bottom nav, transitions
+    │   ├── map.css           ← Styles carte, widgets, boutons flottants
+    │   ├── social.css        ← Chat, groupes, présence riders
+    │   ├── stats.css         ← Dashboard et graphiques
+    │   └── auth.css          ← Formulaires auth/profil rider
+    ├── js/
+    │   ├── app.js            ← Bootstrap global, events UI, PWA install
+    │   ├── auth.js           ← Auth Firebase + profil rider
+    │   ├── navigation.js     ← Navigation onglets mobile-first
+    │   ├── load-data.js      ← Chargement circuits JSON + favoris
+    │   ├── map.js            ← Init Leaflet + rendu markers
+    │   ├── layers.js         ← Couches OSM/Satellite/Terrain/Cycle
+    │   ├── clustering.js     ← Marker cluster + popup résumé
+    │   ├── routing.js        ← Itinéraires inter-circuits + export GPX
+    │   ├── circuits.js       ← UI circuits + sélection routes
+    │   ├── weather.js        ← Météo OpenWeather + alertes
+    │   ├── social.js         ← Partage position temps réel
+    │   ├── groups.js         ← Création/rejoint groupes via code
+    │   ├── chat.js           ← Chat temps réel (100 derniers messages)
+    │   ├── tracking.js       ← Tracking GPS + enregistrement Firestore
+    │   ├── stats.js          ← Dashboard perso + graphiques Chart.js
+    │   ├── bluetooth.js      ← Connexion intercom Web Bluetooth + diagnostic GATT
+    │   ├── intercom-bridge.js← Pont apps constructeurs (Cardo/Sena/etc.)
+    │   └── test-ride.js      ← Checklist live + compteur style moto
+    ├── data/
+    │   └── moto-tracks.json  ← Dataset circuits moto
+    └── icons/                ← Icônes PWA (à compléter avec assets finaux)
+
+Notes de compatibilité intercom:
+- Mode 1: Web Bluetooth (si appareil expose des services GATT)
+- Mode 2: Audio-only (intercom connecté OS, sans API web exploitable)
+- Mode 3: Intercom Hub (ouverture app constructeur depuis la PWA)
+- Objectif produit: éviter le blocage "une seule marque" et garder un fallback stable.

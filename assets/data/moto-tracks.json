@@ -1,0 +1,48 @@
+{
+  "tracks": [
+    {
+      "id": "magny-cours",
+      "name": "Circuit de Magny-Cours",
+      "type": "vitesse",
+      "difficulty": "intermediaire",
+      "region": "Bourgogne",
+      "lat": 46.8648,
+      "lng": 3.1637,
+      "description": "Circuit vitesse mythique avec longues courbes.",
+      "length": 4411
+    },
+    {
+      "id": "albi",
+      "name": "Circuit d'Albi",
+      "type": "motocross",
+      "difficulty": "debutant",
+      "region": "Occitanie",
+      "lat": 43.9292,
+      "lng": 2.148,
+      "description": "Piste roulante ideale pour sessions club.",
+      "length": 3565
+    },
+    {
+      "id": "issoire",
+      "name": "Circuit d'Issoire",
+      "type": "enduro",
+      "difficulty": "expert",
+      "region": "Auvergne",
+      "lat": 45.544,
+      "lng": 3.2494,
+      "description": "Parcours technique avec relief marque.",
+      "length": 2100
+    },
+    {
+      "id": "ledenon",
+      "name": "Circuit de Ledenon",
+      "type": "vitesse",
+      "difficulty": "expert",
+      "region": "Occitanie",
+      "lat": 44.0056,
+      "lng": 4.5096,
+      "description": "Trace vallonnee ideale pour progresser en trajectoire.",
+      "length": 3150
+    }
+  ]
+}

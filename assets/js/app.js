@@ -1,0 +1,221 @@
+import { initAuth, signInWithGoogle, getAuthState, logout } from "./auth.js";
+import { initNavigation } from "./navigation.js";
+import { loadTracks, getTracks } from "./load-data.js";
+import { initMap, renderTracksOnMap, getMap, renderLiveRiders, renderRiderTraces, focusOnGroup } from "./map.js";
+import { initRouting } from "./routing.js";
+import { initCircuitsUI } from "./circuits.js";
+import { loadWeather, renderWeatherWidget } from "./weather.js";
+import { initSocialUI, startLiveLocationShare, stopLiveLocationShare, watchGroupPresence, watchGroupTraces, getOrCreateLocalRiderId } from "./social.js";
+import { sendChatMessage, watchLastMessages } from "./chat.js";
+import { startTracking, stopTrackingAndSave } from "./tracking.js";
+import { renderStatsDashboard } from "./stats.js";
+import { connectBluetoothDevice, disconnectBluetoothDevice, getBluetoothState, diagnoseGattServices } from "./bluetooth.js";
+import { openIntercomVendorApp } from "./intercom-bridge.js";
+import { initTestRideUI } from "./test-ride.js";
+
+const appState = { loading: false, deferredInstallPrompt: null, currentTrips: [] };
+let hasFocusedGroupOnce = false;
+
+function getRuntimeRiderId() {
+  return getAuthState().user?.uid || getOrCreateLocalRiderId();
+}
+
+function setGlobalLoading(value) {
+  appState.loading = value;
+  document.getElementById("globalLoader")?.classList.toggle("hidden", !value);
+}
+
+export function showToast(message, type = "info") {
+  const container = document.getElementById("toastContainer");
+  if (!container) return;
+  const item = document.createElement("div");
+  item.className = "toast";
+  item.style.borderLeftColor = type === "error" ? "#ef4444" : type === "success" ? "#22c55e" : "#FF6B00";
+  item.textContent = message;
+  container.appendChild(item);
+  setTimeout(() => item.remove(), 2600);
+}
+
+function initTheme() {
+  const btn = document.getElementById("themeToggleBtn");
+  const current = localStorage.getItem("moto_theme") || "dark";
+  document.body.classList.toggle("theme-light", current === "light");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    const isLight = document.body.classList.toggle("theme-light");
+    localStorage.setItem("moto_theme", isLight ? "light" : "dark");
+  });
+}
+
+function initProfileUI() {
+  const host = document.getElementById("profileContainer");
+  if (!host) return;
+  const btSupported = getBluetoothState().supported;
+  host.innerHTML = `
+    <div class="auth-card">
+      <h3>Profil rider</h3>
+      <button id="googleSignBtn" class="btn-primary">Connexion Google</button>
+      <button id="logoutBtn" class="btn-danger">Déconnexion</button>
+      <button id="trackStartBtn" class="btn-secondary">Démarrer trajet</button>
+      <button id="trackStopBtn" class="btn-secondary">Stop + sauvegarder trajet</button>
+      <hr style="border-color: rgba(255,255,255,0.15); width: 100%;" />
+      <h4 style="margin: 0;">Intercom Bluetooth</h4>
+      <button id="btConnectBtn" class="btn-primary" ${btSupported ? "" : "disabled"}>Connecter un intercom</button>
+      <button id="btDisconnectBtn" class="btn-secondary">Déconnecter intercom</button>
+      <button id="btDiagBtn" class="btn-secondary">Diagnostic compatibilité</button>
+      <div id="bluetoothStatus">${btSupported ? "Bluetooth prêt pour test." : "Web Bluetooth non supporté sur cet appareil/navigateur."}</div>
+      <pre id="bluetoothDiag" style="white-space: pre-wrap; margin: 0; font-size: 12px; color: var(--muted);"></pre>
+      <hr style="border-color: rgba(255,255,255,0.15); width: 100%;" />
+      <h4 style="margin: 0;">Intercom Hub (apps constructeurs)</h4>
+      <div style="display: grid; gap: 8px; grid-template-columns: 1fr 1fr;">
+        <button id="openCardoAppBtn" class="btn-secondary">Ouvrir Cardo</button>
+        <button id="openSenaAppBtn" class="btn-secondary">Ouvrir Sena</button>
+        <button id="openMidlandAppBtn" class="btn-secondary">Ouvrir Midland</button>
+        <button id="openFodsportsAppBtn" class="btn-secondary">Ouvrir Fodsports</button>
+      </div>
+      <small style="color: var(--muted);">
+        Si l'app n'est pas installée, un site officiel s'ouvre automatiquement.
+      </small>
+      <div id="profileInfo"></div>
+    </div>
+  `;
+  document.getElementById("googleSignBtn")?.addEventListener("click", async () => {
+    try { await signInWithGoogle(); showToast("Connexion réussie", "success"); } catch { showToast("Erreur connexion", "error"); }
+  });
+  document.getElementById("logoutBtn")?.addEventListener("click", async () => {
+    try { await logout(); showToast("Déconnecté", "success"); } catch { showToast("Erreur déconnexion", "error"); }
+  });
+  document.getElementById("trackStartBtn")?.addEventListener("click", () => startTracking());
+  document.getElementById("trackStopBtn")?.addEventListener("click", async () => {
+    const uid = getAuthState().user?.uid;
+    if (!uid) return showToast("Connecte-toi d'abord", "error");
+    const trip = await stopTrackingAndSave(uid);
+    if (trip) {
+      appState.currentTrips.push(trip);
+      renderStatsDashboard(appState.currentTrips);
+      showToast("Trajet enregistré", "success");
+    }
+  });
+  document.getElementById("btConnectBtn")?.addEventListener("click", async () => {
+    try {
+      await connectBluetoothDevice();
+      showToast("Intercom connecté", "success");
+    } catch {
+      showToast("Impossible de connecter l'intercom", "error");
+    }
+  });
+  document.getElementById("btDisconnectBtn")?.addEventListener("click", async () => {
+    await disconnectBluetoothDevice();
+    showToast("Intercom déconnecté", "info");
+  });
+  document.getElementById("btDiagBtn")?.addEventListener("click", async () => {
+    try {
+      const services = await diagnoseGattServices();
+      const state = getBluetoothState();
+      const diag = document.getElementById("bluetoothDiag");
+      if (diag) {
+        diag.textContent = [
+          `Compatibilité: ${state.compatibilityMode}`,
+          `Nom appareil: ${state.device?.name || "inconnu"}`,
+          `Services détectés: ${services.length}`,
+          ...services.map((uuid) => `- ${uuid}`)
+        ].join("\n");
+      }
+      if (!state.device) showToast("Connecte d'abord un intercom", "error");
+      else showToast("Diagnostic terminé", "success");
+    } catch {
+      showToast("Diagnostic impossible", "error");
+    }
+  });
+  document.getElementById("openCardoAppBtn")?.addEventListener("click", async () => {
+    try { await openIntercomVendorApp("cardo"); showToast("Ouverture Cardo...", "info"); } catch { showToast("Ouverture Cardo impossible", "error"); }
+  });
+  document.getElementById("openSenaAppBtn")?.addEventListener("click", async () => {
+    try { await openIntercomVendorApp("sena"); showToast("Ouverture Sena...", "info"); } catch { showToast("Ouverture Sena impossible", "error"); }
+  });
+  document.getElementById("openMidlandAppBtn")?.addEventListener("click", async () => {
+    try { await openIntercomVendorApp("midland"); showToast("Ouverture Midland...", "info"); } catch { showToast("Ouverture Midland impossible", "error"); }
+  });
+  document.getElementById("openFodsportsAppBtn")?.addEventListener("click", async () => {
+    try { await openIntercomVendorApp("fodsports"); showToast("Ouverture Fodsports...", "info"); } catch { showToast("Ouverture Fodsports impossible", "error"); }
+  });
+}
+
+function initPwaInstall() {
+  const installBtn = document.getElementById("installPwaBtn");
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    appState.deferredInstallPrompt = event;
+    installBtn?.classList.remove("hidden");
+  });
+  installBtn?.addEventListener("click", async () => {
+    if (!appState.deferredInstallPrompt) return;
+    appState.deferredInstallPrompt.prompt();
+    await appState.deferredInstallPrompt.userChoice;
+    appState.deferredInstallPrompt = null;
+    installBtn.classList.add("hidden");
+  });
+}
+
+async function bootstrap() {
+  setGlobalLoading(true);
+  try {
+    initTheme();
+    initNavigation();
+    await initAuth();
+    initMap();
+    initRouting(getMap());
+    const tracks = await loadTracks();
+    renderTracksOnMap(tracks);
+    initCircuitsUI();
+    initSocialUI();
+    initProfileUI();
+    renderStatsDashboard(appState.currentTrips);
+    initTestRideUI("statsContainer");
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const weather = await loadWeather(pos.coords.latitude, pos.coords.longitude);
+      renderWeatherWidget(weather);
+    });
+
+    document.getElementById("shareToggleBtn")?.addEventListener("click", () => {
+      const uid = getRuntimeRiderId();
+      if (document.getElementById("shareToggleBtn").textContent?.includes("OFF")) {
+        startLiveLocationShare(uid, "global", () => showToast("Active la permission GPS pour partager ta position", "error"));
+      }
+      else stopLiveLocationShare();
+    });
+    watchGroupPresence("global", (presence) => {
+      const currentUid = getRuntimeRiderId();
+      renderLiveRiders(presence, currentUid);
+      if (!hasFocusedGroupOnce && Object.keys(presence || {}).length > 0) {
+        focusOnGroup(presence);
+        hasFocusedGroupOnce = true;
+      }
+    });
+    watchGroupTraces("global", (traces) => {
+      renderRiderTraces(traces);
+    });
+    document.getElementById("chatSendBtn")?.addEventListener("click", async () => {
+      const input = document.getElementById("chatInput");
+      const text = input?.value?.trim();
+      if (!text) return;
+      await sendChatMessage("global", { text, uid: getRuntimeRiderId() });
+      input.value = "";
+    });
+    watchLastMessages("global", (messages) => {
+      const box = document.getElementById("chatMessages");
+      if (!box) return;
+      box.innerHTML = Object.values(messages).map((m) => `<div class="chat-message">${m.text}</div>`).join("");
+    });
+    initPwaInstall();
+  } catch (error) {
+    console.error("[App] Erreur bootstrap:", error);
+    showToast("Erreur d'initialisation", "error");
+  } finally {
+    setGlobalLoading(false);
+  }
+}
+
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+bootstrap();

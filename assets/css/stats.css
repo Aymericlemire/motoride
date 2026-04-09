@@ -1,0 +1,31 @@
+.stats-grid { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+.stat-card { padding: 12px; border-radius: var(--radius); background: var(--surface); }
+.stat-value { font-size: 22px; font-weight: 700; }
+.chart-wrap { margin-top: 10px; padding: 12px; border-radius: var(--radius); background: var(--surface); }
+
+.test-ride { margin-bottom: 12px; }
+.ride-gauge-wrap { display: grid; place-items: center; margin: 8px 0 12px; }
+.ride-gauge {
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  transform: rotate(-135deg);
+  background: conic-gradient(#FF6B00 0deg, rgba(255,255,255,0.15) 0deg 270deg, transparent 270deg);
+}
+.ride-gauge-inner {
+  width: 150px;
+  height: 150px;
+  border-radius: 999px;
+  background: var(--bg);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  transform: rotate(135deg);
+}
+.ride-speed { font-size: 36px; font-weight: 800; line-height: 1; }
+.ride-unit { color: var(--muted); font-size: 12px; }
+.ride-max { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.ride-checklist { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.ride-actions { margin-top: 10px; display: flex; gap: 8px; }

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#8B5CF6" />
+    <title>MotoTrack</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="assets/icons/icon-192x192.svg" />
+    <link rel="apple-touch-icon" href="assets/icons/icon-192x192.svg" />
+    <link rel="apple-touch-startup-image" href="assets/icons/splash-mobile.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="assets/css/design-system.css" />
+    <link rel="stylesheet" href="assets/css/app.css" />
+    <link rel="stylesheet" href="assets/css/map.css" />
+    <link rel="stylesheet" href="assets/css/social.css" />
+    <link rel="stylesheet" href="assets/css/stats.css" />
+    <link rel="stylesheet" href="assets/css/auth.css" />
+  </head>
+  <body class="theme-dark">
+    <header class="app-header glass-card">
+      <strong>MotoTrack</strong>
+      <div class="header-actions">
+        <button id="themeToggleBtn" class="btn-secondary">Theme</button>
+        <button id="installPwaBtn" class="btn-primary hidden">Installer</button>
+      </div>
+    </header>
+
+    <main id="appMain">
+      <section id="tab-map" class="tab-screen active">
+        <div id="mapContainer">
+          <div id="map"></div>
+          <button id="layerToggleBtn" class="floating-btn">Layers</button>
+          <div id="weatherWidget" class="glass-card weather-widget"></div>
+        </div>
+      </section>
+
+      <section id="tab-circuits" class="tab-screen">
+        <div id="circuitsContainer" class="section-padding"></div>
+      </section>
+
+      <section id="tab-social" class="tab-screen">
+        <div id="socialContainer" class="section-padding"></div>
+      </section>
+
+      <section id="tab-stats" class="tab-screen">
+        <div id="statsContainer" class="section-padding"></div>
+      </section>
+
+      <section id="tab-profile" class="tab-screen">
+        <div id="profileContainer" class="section-padding"></div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button data-tab="map" class="bottom-nav-btn active">Carte</button>
+      <button data-tab="circuits" class="bottom-nav-btn">Circuits</button>
+      <button data-tab="social" class="bottom-nav-btn">Social</button>
+      <button data-tab="stats" class="bottom-nav-btn">Stats</button>
+      <button data-tab="profile" class="bottom-nav-btn">Profil</button>
+    </nav>
+
+    <div id="toastContainer" class="toast-container"></div>
+    <div id="globalLoader" class="global-loader hidden">Chargement...</div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="assets/js/app.js"></script>
+  </body>
+</html>

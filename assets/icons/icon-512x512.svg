@@ -1,0 +1,23 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg512" x1="64" y1="32" x2="448" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1a1230"/>
+      <stop offset="1" stop-color="#07050e"/>
+    </linearGradient>
+    <linearGradient id="acc512" x1="140" y1="140" x2="372" y2="372" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c4b5fd"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+    <radialGradient id="glow512" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(256 290) rotate(90) scale(160)">
+      <stop stop-color="#8b5cf6" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="24" y="24" width="464" height="464" rx="112" fill="url(#bg512)"/>
+  <rect x="24.75" y="24.75" width="462.5" height="462.5" rx="111.25" stroke="#c4b5fd" stroke-opacity="0.3" stroke-width="1.5"/>
+  <ellipse cx="256" cy="300" rx="170" ry="120" fill="url(#glow512)"/>
+  <path d="M143 274C143 198 199 142 256 142C313 142 369 198 369 268V286H331V268C331 222 297 188 256 188C215 188 181 223 181 272V286H143V274Z" fill="url(#acc512)"/>
+  <path d="M167 293H221C232 293 241 302 241 313V330C241 341 232 350 221 350H167C156 350 147 341 147 330V313C147 302 156 293 167 293Z" fill="#f5f3ff"/>
+  <path d="M291 293H345C356 293 365 302 365 313V330C365 341 356 350 345 350H291C280 350 271 341 271 330V313C271 302 280 293 291 293Z" fill="#f5f3ff"/>
+  <circle cx="256" cy="256" r="140" stroke="#8b5cf6" stroke-opacity="0.22" stroke-width="3"/>
+</svg>

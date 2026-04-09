@@ -5,7 +5,8 @@ const mapState = {
   loading: false,
   map: null,
   riderMarkers: new Map(),
-  riderPolylines: new Map()
+  riderPolylines: new Map(),
+  selfMarker: null
 };
 
 export function getMap() {
@@ -119,5 +120,33 @@ export function focusOnGroup(presenceMap = {}) {
     mapState.map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
   } catch (error) {
     console.error("[Map] Erreur focusOnGroup:", error);
+  }
+}
+
+/**
+ * Affiche la position locale du pilote, meme si Firebase n'ecrit pas.
+ */
+export function renderSelfPilotPosition(position, label = "Moi (local)") {
+  try {
+    if (!mapState.map || !position?.coords) return;
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+    const icon = L.divIcon({
+      className: "rider-self-marker",
+      html: `<div style="width:18px;height:18px;border-radius:50%;background:#22c55e;border:3px solid #fff;box-shadow:0 0 10px #22c55e88;"></div>`,
+      iconSize: [18, 18],
+      iconAnchor: [9, 9]
+    });
+
+    if (mapState.selfMarker) {
+      mapState.selfMarker.setLatLng([lat, lng]);
+    } else {
+      mapState.selfMarker = L.marker([lat, lng], { icon }).addTo(mapState.map);
+    }
+    mapState.selfMarker.bindPopup(`<strong>${label}</strong><br>GPS local actif`);
+  } catch (error) {
+    console.error("[Map] Erreur renderSelfPilotPosition:", error);
   }
 }

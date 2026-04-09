@@ -3,6 +3,10 @@ import { ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.1
 
 const socialState = { loading: false, shareEnabled: false, timerId: null, watchId: null, currentGroupId: null };
 
+export function isLiveLocationShareEnabled() {
+  return socialState.shareEnabled;
+}
+
 export function getOrCreateLocalRiderId() {
   const key = "mototrack_local_rider_id";
   const existing = localStorage.getItem(key);
@@ -35,15 +39,20 @@ function setSocialStatus(message) {
   if (node) node.textContent = `Statut: ${message}`;
 }
 
-export function startLiveLocationShare(uid, groupId = "global", onError = null) {
+export function startLiveLocationShare(uid, groupId = "global", onError = null, onLocalPosition = null) {
   socialState.loading = true;
   socialState.shareEnabled = true;
   socialState.currentGroupId = groupId;
   const btn = document.getElementById("shareToggleBtn");
   if (btn) btn.textContent = "Partager ma position ON";
   try {
+    if (!("geolocation" in navigator)) {
+      throw new Error("Geolocalisation non supportee sur cet appareil.");
+    }
+
     const { rtdb } = getFirebaseServices();
     const publishPosition = async (position) => {
+      if (typeof onLocalPosition === "function") onLocalPosition(position);
       try {
         const payload = {
           lat: position.coords.latitude,

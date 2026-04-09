@@ -1,11 +1,11 @@
 import { initAuth, signInWithGoogle, getAuthState, logout } from "./auth.js";
 import { initNavigation } from "./navigation.js";
 import { loadTracks, getTracks } from "./load-data.js";
-import { initMap, renderTracksOnMap, getMap, renderLiveRiders, renderRiderTraces, focusOnGroup } from "./map.js";
+import { initMap, renderTracksOnMap, getMap, renderLiveRiders, renderRiderTraces, focusOnGroup, renderSelfPilotPosition } from "./map.js";
 import { initRouting } from "./routing.js";
 import { initCircuitsUI } from "./circuits.js";
 import { loadWeather, renderWeatherWidget } from "./weather.js";
-import { initSocialUI, startLiveLocationShare, stopLiveLocationShare, watchGroupPresence, watchGroupTraces, getOrCreateLocalRiderId } from "./social.js";
+import { initSocialUI, startLiveLocationShare, stopLiveLocationShare, watchGroupPresence, watchGroupTraces, getOrCreateLocalRiderId, isLiveLocationShareEnabled } from "./social.js";
 import { sendChatMessage, watchLastMessages } from "./chat.js";
 import { startTracking, stopTrackingAndSave } from "./tracking.js";
 import { renderStatsDashboard } from "./stats.js";
@@ -180,10 +180,19 @@ async function bootstrap() {
 
     document.getElementById("shareToggleBtn")?.addEventListener("click", () => {
       const uid = getRuntimeRiderId();
-      if (document.getElementById("shareToggleBtn").textContent?.includes("OFF")) {
-        startLiveLocationShare(uid, "global", () => showToast("Active la permission GPS pour partager ta position", "error"));
+      if (!isLiveLocationShareEnabled()) {
+        startLiveLocationShare(
+          uid,
+          "global",
+          () => showToast("Active la permission GPS pour partager ta position", "error"),
+          (position) => renderSelfPilotPosition(position, "Moi (GPS local)")
+        );
+        showToast("Partage de position active", "success");
       }
-      else stopLiveLocationShare();
+      else {
+        stopLiveLocationShare();
+        showToast("Partage de position desactive", "info");
+      }
     });
     watchGroupPresence("global", (presence) => {
       const currentUid = getRuntimeRiderId();

@@ -1,59 +1,125 @@
 :root {
-  --bg: #07050e;
-  --bg-soft: #151026;
-  --surface: rgba(139, 92, 246, 0.12);
-  --text: #f5f3ff;
-  --muted: #c4b5fd;
-  --primary: #8b5cf6;
-  --primary-strong: #7c3aed;
-  --danger: #ef4444;
-  --success: #22c55e;
-  --radius: 12px;
-  --transition: 0.3s ease;
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #141414;
+  --bg-card: #1a1a1a;
+  --bg-card-hover: #222222;
+  --bg-glass: rgba(255, 255, 255, 0.05);
+
+  --orange-primary: #ff6b00;
+  --orange-light: #ff8c00;
+  --orange-glow: rgba(255, 107, 0, 0.3);
+  --orange-glow-strong: rgba(255, 107, 0, 0.5);
+
+  --text-primary: #ffffff;
+  --text-secondary: #999999;
+  --text-muted: #555555;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --border-orange: rgba(255, 107, 0, 0.4);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-orange: 0 0 20px rgba(255, 107, 0, 0.4);
+
+  --map-bg: #1a1a2e;
+  --map-road: #ff6b00;
+  --map-road-glow: rgba(255, 107, 0, 0.6);
 }
 
-body.theme-light {
-  --bg: #f8fafc;
-  --bg-soft: #e2e8f0;
-  --surface: rgba(0, 0, 0, 0.05);
-  --text: #0f172a;
-  --muted: #475569;
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-* { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; font-family: Inter, sans-serif; color: var(--text); }
+html,
 body {
-  background:
-    linear-gradient(rgba(7, 5, 14, 0.72), rgba(7, 5, 14, 0.82)),
-    url("../img-rider-bg.png") center / cover fixed no-repeat;
-}
-button, input, select, textarea { font: inherit; }
-
-.hidden { display: none !important; }
-.section-padding { padding: 16px; padding-bottom: 90px; }
-
-.glass-card {
-  border-radius: var(--radius);
-  background: linear-gradient(160deg, rgba(139, 92, 246, 0.14), rgba(10, 8, 18, 0.66));
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(196, 181, 253, 0.2);
-  box-shadow: 0 10px 25px rgba(76, 29, 149, 0.25);
+  margin: 0;
+  padding: 0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
 }
 
-.btn-primary, .btn-secondary, .btn-danger {
-  border: 0;
-  border-radius: var(--radius);
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.app {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  background: var(--bg-primary);
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-screen {
+  display: none;
+}
+
+.tab-screen.active {
+  display: block;
+}
+
+.section-padding {
+  padding: 20px;
+  padding-bottom: 120px;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  border: 1px solid var(--border);
+  border-radius: 12px;
   padding: 10px 14px;
   cursor: pointer;
-  transition: transform var(--transition), opacity var(--transition), background var(--transition);
 }
-.btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-strong)); color: white; }
-.btn-secondary { background: var(--bg-soft); color: var(--text); }
-.btn-danger { background: var(--danger); color: white; }
-.btn-primary:active, .btn-secondary:active, .btn-danger:active { transform: scale(0.98); }
 
-.toast-container { position: fixed; top: 12px; left: 12px; right: 12px; z-index: 2000; display: grid; gap: 8px; }
-.toast { padding: 10px 12px; border-radius: var(--radius); background: #160f2e; color: white; border-left: 4px solid var(--primary); }
+.btn-primary {
+  background: var(--orange-primary);
+  color: #fff;
+  border-color: var(--border-orange);
+}
+
+.btn-secondary {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.btn-danger {
+  background: #a91f1f;
+  color: #fff;
+}
+
+.glass-card {
+  background: rgba(15, 15, 15, 0.85);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+}
+
+.toast-container {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 2000;
+  display: grid;
+  gap: 8px;
+}
+
+.toast {
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.86);
+  border-left: 4px solid var(--orange-primary);
+  color: #fff;
+  padding: 10px 12px;
+}
 
 .global-loader {
   position: fixed;
@@ -61,5 +127,5 @@ button, input, select, textarea { font: inherit; }
   z-index: 3000;
   display: grid;
   place-items: center;
-  background: rgba(8, 5, 17, 0.72);
+  background: rgba(0, 0, 0, 0.55);
 }

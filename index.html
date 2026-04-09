@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#8B5CF6" />
+    <meta name="theme-color" content="#FF6B00" />
     <title>MotoTrack</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" type="image/svg+xml" href="assets/icons/icon-192x192.svg" />
@@ -23,24 +23,77 @@
     <link rel="stylesheet" href="assets/css/stats.css" />
     <link rel="stylesheet" href="assets/css/auth.css" />
   </head>
-  <body class="theme-dark">
-    <header class="app-header glass-card">
-      <strong>MotoTrack</strong>
-      <div class="header-actions">
-        <button id="themeToggleBtn" class="btn-secondary">Theme</button>
-        <button id="installPwaBtn" class="btn-primary hidden">Installer</button>
-      </div>
-    </header>
-
-    <main id="appMain">
+  <body>
+    <main id="appMain" class="app">
       <section id="tab-map" class="tab-screen active">
-        <div id="mapContainer">
+        <header class="header">
+          <button class="btn-back">←</button>
+          <div class="gps-badge">
+            <span>🏍️</span>
+            <div>
+              <div class="gps-badge-title">GPS Connected</div>
+              <div class="gps-badge-sub">Tracking active</div>
+            </div>
+            <span class="gps-dot"></span>
+          </div>
+          <button class="btn-notif">🔔</button>
+        </header>
+
+        <div id="mapContainer" class="map-container">
           <div id="map"></div>
-          <button id="layerToggleBtn" class="floating-btn">Layers</button>
-          <button id="locatePilotBtn" class="floating-btn floating-btn-left">Me localiser</button>
-          <div id="gpsLivePanel" class="glass-card gps-live-panel">GPS: en attente...</div>
-          <div id="weatherWidget" class="glass-card weather-widget"></div>
+          <div id="weatherWidget" class="glass-card weather-widget hidden"></div>
+          <div id="gpsLivePanel" class="glass-card gps-live-panel hidden">GPS: en attente...</div>
+          <button id="layerToggleBtn" class="hidden">Layer</button>
+          <button id="locatePilotBtn" class="hidden">Me localiser</button>
+
+          <article class="card-current-ride glass-card">
+            <h3>Current Ride</h3>
+            <div class="ride-stat">
+              <span class="ride-stat-label">Distance</span>
+              <span class="ride-stat-value">125 km</span>
+            </div>
+            <div class="ride-stat">
+              <span class="ride-stat-label">Duration</span>
+              <span class="ride-stat-value ride-timer">02:14:36</span>
+            </div>
+          </article>
+
+          <article class="card-top-speed glass-card">
+            <h4>Top Speed</h4>
+            <div class="speed-value">187</div>
+            <div class="speed-unit">km/h</div>
+          </article>
         </div>
+
+        <section class="profile-section">
+          <div class="profile-row">
+            <div class="profile-info">
+              <img class="profile-avatar" src="https://i.pravatar.cc/100?img=8" alt="Alex Martin" />
+              <div>
+                <div class="profile-name">Alex Martin</div>
+                <div class="profile-title">Pro Rider</div>
+              </div>
+            </div>
+            <button class="btn-more">⋯</button>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-row">
+              <span class="stat-label">Rides</span>
+              <div class="stat-values">
+                <span class="stat-value">248</span>
+                <span class="stat-value">46 km</span>
+              </div>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Total KM</span>
+              <div class="stat-values">
+                <span class="stat-value">18,450</span>
+                <span class="stat-value">92 km/h</span>
+              </div>
+            </div>
+          </div>
+        </section>
       </section>
 
       <section id="tab-circuits" class="tab-screen">
@@ -61,11 +114,11 @@
     </main>
 
     <nav class="bottom-nav">
-      <button data-tab="map" class="bottom-nav-btn active">Carte</button>
-      <button data-tab="circuits" class="bottom-nav-btn">Circuits</button>
-      <button data-tab="social" class="bottom-nav-btn">Social</button>
-      <button data-tab="stats" class="bottom-nav-btn">Stats</button>
-      <button data-tab="profile" class="bottom-nav-btn">Profil</button>
+      <button data-tab="map" class="nav-item active"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
+      <button data-tab="circuits" class="nav-item"><span class="nav-icon">🗺️</span><span class="nav-label">Map</span></button>
+      <button data-tab="stats" class="nav-item"><span class="nav-icon">🎯</span><span class="nav-label">Stats</span></button>
+      <button data-tab="social" class="nav-item"><span class="nav-icon">🏍️</span><span class="nav-label">Riders</span></button>
+      <button data-tab="profile" class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span></button>
     </nav>
 
     <div id="toastContainer" class="toast-container"></div>

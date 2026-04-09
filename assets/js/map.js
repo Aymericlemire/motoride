@@ -18,8 +18,37 @@ export function initMap() {
   try {
     mapState.map = L.map("map", { zoomControl: false }).setView([46.5398, 2.4303], 6);
     window.motoTrackMap = mapState.map;
+    const darkTile = L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+      { attribution: "©CartoDB", maxZoom: 19 }
+    );
+    darkTile.addTo(mapState.map);
+
     initBaseLayers(mapState.map);
     initClusterLayer(mapState.map);
+
+    // Démo visuelle "route orange glow" alignée avec le design.
+    const routeDemo = [
+      [48.8566, 2.3522],
+      [48.8705, 2.3301],
+      [48.8858, 2.2979]
+    ];
+    L.polyline(routeDemo, {
+      color: "#FF6B00",
+      weight: 4,
+      opacity: 0.9,
+      smoothFactor: 1,
+      className: "route-glow"
+    }).addTo(mapState.map);
+
+    const startIcon = L.divIcon({ className: "marker-start", html: "START", iconSize: [60, 24] });
+    const checkpointIcon = L.divIcon({ className: "marker-checkpoint", html: "CHECK", iconSize: [60, 24] });
+    const finishIcon = L.divIcon({ className: "marker-finish", html: "FINISH", iconSize: [64, 24] });
+    const liveIcon = L.divIcon({ className: "marker-live", html: "<span class='marker-live-icon'>🏍️</span>", iconSize: [28, 28] });
+    L.marker(routeDemo[0], { icon: startIcon }).addTo(mapState.map);
+    L.marker(routeDemo[1], { icon: checkpointIcon }).addTo(mapState.map);
+    L.marker(routeDemo[2], { icon: finishIcon }).addTo(mapState.map);
+    L.marker(routeDemo[1], { icon: liveIcon }).addTo(mapState.map);
 
     document.getElementById("layerToggleBtn")?.addEventListener("click", () => {
       const next = localStorage.getItem("moto_layer") === "osm" ? "satellite" : "osm";
@@ -41,7 +70,7 @@ export function renderTracksOnMap(tracks = []) {
 }
 
 function riderIcon(isSelf = false) {
-  const color = isSelf ? "#8b5cf6" : "#a855f7";
+  const color = isSelf ? "#ff8c00" : "#ff6b00";
   return L.divIcon({
     className: "rider-live-marker",
     html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 0 8px ${color}88;"></div>`,

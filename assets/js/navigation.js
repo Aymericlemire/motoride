@@ -13,7 +13,7 @@ export function setActiveTab(tab) {
     document.querySelectorAll(".tab-screen").forEach((screen) => {
       screen.classList.toggle("active", screen.id === `tab-${tab}`);
     });
-    document.querySelectorAll(".bottom-nav-btn").forEach((btn) => {
+    document.querySelectorAll(".nav-item").forEach((btn) => {
       btn.classList.toggle("active", btn.dataset.tab === tab);
     });
     navState.activeTab = tab;
@@ -29,7 +29,7 @@ export function setActiveTab(tab) {
 
 export function initNavigation() {
   try {
-    document.querySelectorAll(".bottom-nav-btn").forEach((btn) => {
+    document.querySelectorAll(".nav-item").forEach((btn) => {
       btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
     });
   } catch (error) {

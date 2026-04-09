@@ -1,5 +1,5 @@
-const STATIC_CACHE = "mototrack-static-v3";
-const DATA_CACHE = "mototrack-data-v3";
+const STATIC_CACHE = "mototrack-static-v4";
+const DATA_CACHE = "mototrack-data-v4";
 const OFFLINE_QUEUE = "mototrack-offline-messages";
 
 const STATIC_ASSETS = [

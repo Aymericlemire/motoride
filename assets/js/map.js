@@ -135,9 +135,9 @@ export function renderSelfPilotPosition(position, label = "Moi (local)") {
 
     const icon = L.divIcon({
       className: "rider-self-marker",
-      html: `<div style="width:18px;height:18px;border-radius:50%;background:#22c55e;border:3px solid #fff;box-shadow:0 0 10px #22c55e88;"></div>`,
-      iconSize: [18, 18],
-      iconAnchor: [9, 9]
+      html: `<div class="rider-self-pulse"></div>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12]
     });
 
     if (mapState.selfMarker) {
@@ -146,6 +146,10 @@ export function renderSelfPilotPosition(position, label = "Moi (local)") {
       mapState.selfMarker = L.marker([lat, lng], { icon }).addTo(mapState.map);
     }
     mapState.selfMarker.bindPopup(`<strong>${label}</strong><br>GPS local actif`);
+    const panel = document.getElementById("gpsLivePanel");
+    if (panel) {
+      panel.textContent = `GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    }
   } catch (error) {
     console.error("[Map] Erreur renderSelfPilotPosition:", error);
   }

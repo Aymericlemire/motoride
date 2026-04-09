@@ -45,6 +45,25 @@ function describeGeoError(error) {
   return "Erreur GPS inconnue.";
 }
 
+async function requestGpsPermission() {
+  try {
+    if (!("geolocation" in navigator)) {
+      showToast("Geolocalisation non supportee sur cet appareil", "error");
+      return false;
+    }
+
+    // Force la popup de permission navigateur si nécessaire.
+    await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 12000 });
+    });
+    showToast("Permission GPS accordee", "success");
+    return true;
+  } catch (error) {
+    showToast(describeGeoError(error), "error");
+    return false;
+  }
+}
+
 function startLocalPilotWatcher() {
   try {
     if (!("geolocation" in navigator)) {
@@ -88,6 +107,7 @@ function initProfileUI() {
       <button id="logoutBtn" class="btn-danger">Déconnexion</button>
       <button id="trackStartBtn" class="btn-secondary">Démarrer trajet</button>
       <button id="trackStopBtn" class="btn-secondary">Stop + sauvegarder trajet</button>
+      <button id="gpsPermissionBtn" class="btn-primary">Autoriser GPS</button>
       <hr style="border-color: rgba(255,255,255,0.15); width: 100%;" />
       <h4 style="margin: 0;">Intercom Bluetooth</h4>
       <button id="btConnectBtn" class="btn-primary" ${btSupported ? "" : "disabled"}>Connecter un intercom</button>
@@ -116,6 +136,16 @@ function initProfileUI() {
     try { await logout(); showToast("Déconnecté", "success"); } catch { showToast("Erreur déconnexion", "error"); }
   });
   document.getElementById("trackStartBtn")?.addEventListener("click", () => startTracking());
+  document.getElementById("gpsPermissionBtn")?.addEventListener("click", async () => {
+    const granted = await requestGpsPermission();
+    if (granted) {
+      startLocalPilotWatcher();
+      navigator.geolocation.getCurrentPosition((pos) => {
+        renderSelfPilotPosition(pos, "Moi (local)");
+        getMap()?.setView([pos.coords.latitude, pos.coords.longitude], 17);
+      });
+    }
+  });
   document.getElementById("trackStopBtn")?.addEventListener("click", async () => {
     const uid = getAuthState().user?.uid;
     if (!uid) return showToast("Connecte-toi d'abord", "error");
@@ -193,6 +223,7 @@ async function bootstrap() {
     initTheme();
     initNavigation();
     await initAuth();
+    await requestGpsPermission();
     initMap();
     initRouting(getMap());
     const tracks = await loadTracks();
@@ -216,7 +247,7 @@ async function bootstrap() {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           renderSelfPilotPosition(pos, "Moi (local)");
-          getMap()?.setView([pos.coords.latitude, pos.coords.longitude], 15);
+          getMap()?.setView([pos.coords.latitude, pos.coords.longitude], 17);
           showToast("Position pilote mise a jour", "success");
         },
         (error) => showToast(describeGeoError(error), "error"),
